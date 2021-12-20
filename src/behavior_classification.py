@@ -33,10 +33,16 @@ labels = kmeans.labels_
 
 l = X.shape[0] // 3
 for i in range(3):
-    print('------------------ best.{}.txt'.format(training[i]))
+    print("------------------ best.{}.txt".format(training[i]))
     for row, label in zip(
         training_data[i][training_data[i]["iterations"] == 204].itertuples(),
         labels[l * i : l * (i + 1)],
     ):
-        descriptive_label = '[{},{}]'.format(row.terrain, row.shape)
-        print('{} -> {} {}'.format(descriptive_label, ''.join([' ' for _ in range(30 - len(descriptive_label))]), label))
+        descriptive_label = "[{},{}]".format(row.terrain, row.shape)
+        print(
+            "{} -> {} {}".format(
+                descriptive_label,
+                "".join([" " for _ in range(30 - len(descriptive_label))]),
+                label,
+            )
+        )
