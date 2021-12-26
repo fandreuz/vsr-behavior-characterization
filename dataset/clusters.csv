@@ -1,0 +1,8 @@
+hilly-1-5-rnd,worm-5x2,2,2,2,2,0,0,0,2,2,2
+hilly-1-5-rnd,biped-4x3,2,2,2,2,2,2,2,2,1,2
+steppy-1-10-rnd,worm-5x2,2,2,0,2,2,2,2,2,2,2
+steppy-1-10-rnd,biped-4x3,2,2,2,2,2,2,2,2,2,2
+downhill-20,worm-5x2,1,1,2,2,1,1,1,2,1,1
+downhill-20,biped-4x3,1,1,1,1,1,1,1,1,1,1
+uphill-20,worm-5x2,0,0,0,0,0,0,0,0,0,0
+uphill-20,biped-4x3,2,0,2,0,0,0,2,0,0,0

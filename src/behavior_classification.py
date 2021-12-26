@@ -64,7 +64,7 @@ print(beautiful_padded('SEED', ' '.join(map(str, range(10)))))
 for k, l in dc.items():
     print(beautiful_padded(str(k) + ' ->    ', ' '.join(l)))
 
-with open('clusters.csv','w') as f:
+with open('dataset/clusters.csv','w') as f:
     writer = csv.writer(f)
     for t, s in dc.keys():
         lb = dc[(t,s)]
