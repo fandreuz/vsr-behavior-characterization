@@ -1,7 +1,18 @@
 import pandas as pd
 import numpy as np
+import sys
+import csv
 
 from sklearn.cluster import KMeans
+
+n_pad = 40
+
+def beautiful_padded(key, value):
+    return "{}{}{}".format(
+                key,
+                "".join([" " for _ in range(n_pad - len(key))]),
+                value,
+            )
 
 # we consider these two set of columns the key predictors
 columns = [
@@ -15,7 +26,7 @@ columns.extend(
     ]
 )
 
-training = [7, 8, 9]
+training = list(range(10))
 training_data = [
     pd.read_csv("dataset/best.{}.txt".format(i), sep=";") for i in training
 ]
@@ -23,26 +34,39 @@ training_data = [
 X = np.concatenate(
     [
         training_data[i][training_data[i]["iterations"] == 204][columns]
-        for i in range(3)
+        for i in range(len(training))
     ]
 )
 
-# we expect three clusters (walking, jumping, crawling)
-kmeans = KMeans(n_clusters=3).fit(X)
+if len(sys.argv) > 1:
+    clusters = int(sys.argv[1])
+else:
+    clusters = 3
+
+kmeans = KMeans(n_clusters=clusters).fit(X)
 labels = kmeans.labels_
 
-l = X.shape[0] // 3
-for i in range(3):
-    print("------------------ best.{}.txt".format(training[i]))
+dc = {}
+
+l = X.shape[0] // len(training)
+for i in range(len(training)):
     for row, label in zip(
         training_data[i][training_data[i]["iterations"] == 204].itertuples(),
         labels[l * i : l * (i + 1)],
     ):
-        descriptive_label = "[{},{}]".format(row.terrain, row.shape)
-        print(
-            "{} -> {} {}".format(
-                descriptive_label,
-                "".join([" " for _ in range(30 - len(descriptive_label))]),
-                label,
-            )
-        )
+        key = (row.terrain, row.shape)
+        if key not in dc:
+            dc[key] = []
+        dc[key].append(str(label))
+
+
+print(beautiful_padded('SEED', ' '.join(map(str, range(10)))))
+for k, l in dc.items():
+    print(beautiful_padded(str(k) + ' ->    ', ' '.join(l)))
+
+with open('clusters.csv','w') as f:
+    writer = csv.writer(f)
+    for t, s in dc.keys():
+        lb = dc[(t,s)]
+        row = [t,s,*lb]
+        writer.writerow(row)
