@@ -24,6 +24,11 @@ from sklearn.cluster import KMeans
 # gait→num.unique.footprints' : Number of unique footprints in the n-gram.
 # gait→footprints'    : Comma-separated list of footprints in the main n-gram.
 
+if len(sys.argv) > 1:
+    clusters = int(sys.argv[1])
+else:
+    clusters = 3
+
 # we consider these two set of columns the key predictors
 columns = [
     "best→fitness→as[Outcome]→center.spectrum.x→[{}]".format(i)
@@ -49,12 +54,7 @@ X = np.concatenate(
     ]
 )
 
-if len(sys.argv) > 1:
-    clusters = int(sys.argv[1])
-else:
-    clusters = 3
-
-kmeans = KMeans(n_clusters=clusters, algorithm='full').fit(X)
+kmeans = KMeans(n_clusters=clusters, algorithm="full").fit(X)
 
 # these are our clusters
 labels = kmeans.labels_
@@ -72,14 +72,14 @@ for i in range(len(training)):
             dc[key] = []
         dc[key].append(str(label))
 
-
-print(beautiful_padded('SEED', ' '.join(map(str, range(10)))))
+print(beautiful_padded("SEED", " ".join(map(str, range(10)))))
+print("-" * 40 + "-" * 2 * len(training_data))
 for k, l in dc.items():
-    print(beautiful_padded(str(k) + ' ->    ', ' '.join(l)))
+    print(beautiful_padded(str(k) + " ->    ", " ".join(l)))
 
-with open('dataset/clusters.csv','w') as f:
+with open("dataset/clusters.csv", "w") as f:
     writer = csv.writer(f)
     for t, s in dc.keys():
-        lb = dc[(t,s)]
-        row = [t,s,*lb]
+        lb = dc[(t, s)]
+        row = [t, s, *lb]
         writer.writerow(row)
