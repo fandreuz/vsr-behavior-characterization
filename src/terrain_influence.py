@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from itertools import product
 
-aggregate = True
+aggregate = False
 # t if terrain, s if shape
-dominant_key = 's'
+dominant_key = 't'
 
 dc = {}
 

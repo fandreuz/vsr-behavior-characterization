@@ -1,3 +1,5 @@
+from utils import beautiful_padded
+
 import pandas as pd
 import numpy as np
 import sys
@@ -22,15 +24,6 @@ from sklearn.cluster import KMeans
 # gait→num.unique.footprints' : Number of unique footprints in the n-gram.
 # gait→footprints'    : Comma-separated list of footprints in the main n-gram.
 
-n_pad = 40
-
-def beautiful_padded(key, value):
-    return "{}{}{}".format(
-                key,
-                "".join([" " for _ in range(n_pad - len(key))]),
-                value,
-            )
-
 # we consider these two set of columns the key predictors
 columns = [
     "best→fitness→as[Outcome]→center.spectrum.x→[{}]".format(i)
@@ -43,6 +36,7 @@ columns.extend(
     ]
 )
 
+# load the dataset
 training = list(range(10))
 training_data = [
     pd.read_csv("dataset/best.{}.txt".format(i), sep=";") for i in training
@@ -60,7 +54,9 @@ if len(sys.argv) > 1:
 else:
     clusters = 3
 
-kmeans = KMeans(n_clusters=clusters).fit(X)
+kmeans = KMeans(n_clusters=clusters, algorithm='full').fit(X)
+
+# these are our clusters
 labels = kmeans.labels_
 
 dc = {}
