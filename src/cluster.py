@@ -17,6 +17,9 @@ class Cluster:
     def intersect(self, other):
         return self._items.intersection(other._items)
 
+    def size(self):
+        return len(self._items)
+
     def __ne__(self, other):
         return len(self.difference(other)) > 0
 
@@ -24,4 +27,4 @@ class Cluster:
         return str(self)
 
     def __str__(self):
-        return "[" + ";".join(map(str, self._items)) + "]"
+        return "[" + ";".join(map(str, self._items)) + "]\n"

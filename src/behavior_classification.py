@@ -46,11 +46,11 @@ for label, bp, wm in zip(
         cl = Cluster(name=label)
         supervised_clusters.append(cl)
 
-        for item in biped_walking:
+        for item in bp:
             cl.add(
                 VSR(shape="biped-4x3", training_terrain=item[0], seed=item[1])
             )
-        for item in worm_walking:
+        for item in wm:
             cl.add(
                 VSR(shape="worm-5x2", training_terrain=item[0], seed=item[1])
             )

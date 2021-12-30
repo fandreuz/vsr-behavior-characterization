@@ -12,6 +12,7 @@ biped_jumping = [
     ("hilly-1-5-rnd", 9),
     ("steppy-1-10-rnd", 0),
     ("steppy-1-10-rnd", 1),
+    ("steppy-1-10-rnd", 2),
     ("steppy-1-10-rnd", 3),
     ("steppy-1-10-rnd", 4),
     ("steppy-1-10-rnd", 5),
