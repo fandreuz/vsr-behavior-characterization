@@ -10,21 +10,21 @@ from itertools import product
 from sklearn.cluster import KMeans
 
 # ----- Interpreting Gait -----
-# gait→avg.touch.area : M* is an n-gram of footprints m_i. touch_area is the
+# gait->avg.touch.area : M* is an n-gram of footprints m_i. touch_area is the
 #                       number of True elements in m_i over all the footprints
 #                       in the n-gram, divided by 8*n (8 is the number of
 #                       components of each footprint).
-# gait→num.footprints': n, i.e. the number of footprints in the n-gram.
-# gait→mode.interval' : Since each footprint is collected at a fixed time
+# gait->num.footprints': n, i.e. the number of footprints in the n-gram.
+# gait->mode.interval' : Since each footprint is collected at a fixed time
 #                       interval DeltaT = 0.5l, the distance in time between
 #                       two occurrences of the main n-gram is a discrete
 #                       variable. Therefore we may compute its mode.
-# gait→coverage'      : ???
-# gait→purity'        : Rate of time intervals between two consecutive
+# gait->coverage'      : ???
+# gait->purity'        : Rate of time intervals between two consecutive
 #                       occurrences of the main n-gram which are equal to the
-#                       mode gait→mode.interval.
-# gait→num.unique.footprints' : Number of unique footprints in the n-gram.
-# gait→footprints'    : Comma-separated list of footprints in the main n-gram.
+#                       mode gait->mode.interval.
+# gait->num.unique.footprints' : Number of unique footprints in the n-gram.
+# gait->footprints'    : Comma-separated list of footprints in the main n-gram.
 
 if len(sys.argv) > 1:
     clusters = int(sys.argv[1])
