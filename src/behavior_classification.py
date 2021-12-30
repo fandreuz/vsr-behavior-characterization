@@ -42,6 +42,7 @@ else:
 
 visual_clusters_intersection = False
 normalize_spectra = True
+random_samples = True
 
 # ------------------------------------------------------
 # allocate and fill supervised clusters
@@ -123,7 +124,6 @@ X = concatenated_training_data[columns].values
 
 # normalize spectrum
 if normalize_spectra:
-    print("Normalizing data")
     X -= np.mean(X)
 
     vr = np.std(X)
@@ -168,9 +168,16 @@ for avg_touch_mapping, avg_touch_label in zip(
         weights = np.ones(X.shape[1])
         weights[0] = avg_touch_area_w
 
+        if random_samples:
+            random_columns = np.concatenate(
+                [[0, 1], np.random.randint(2, X.shape[1], (X.shape[1] - 2) // 2)]
+            )
+        else:
+            random_columns = np.arange(0, X.shape[1])
+
         # unsupervised learning engine
         kmeans = KMeans(n_clusters=n_clusters, algorithm="full").fit(
-            X * weights
+            (X * weights)[:, random_columns]
         )
 
         # these are our clusters
