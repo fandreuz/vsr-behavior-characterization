@@ -1,4 +1,5 @@
 from collections import namedtuple
+import csv
 
 VSR = namedtuple("VSR", ["shape", "training_terrain", "seed"])
 
@@ -20,6 +21,14 @@ class Cluster:
     def size(self):
         return len(self._items)
 
+    def save(self, name='clusters.csv'):
+        with open("dataset/clusters.csv", "w") as f:
+            writer = csv.writer(f)
+            for t, s in dc.keys():
+                lb = dc[(t, s)]
+                row = [t, s, *lb]
+                writer.writerow(row)
+
     def __ne__(self, other):
         return len(self.difference(other)) > 0
 
@@ -27,4 +36,4 @@ class Cluster:
         return str(self)
 
     def __str__(self):
-        return "[" + ";".join(map(str, self._items)) + "]\n"
+        return "[" + "; ".join(map(str, self._items)) + "]\n"

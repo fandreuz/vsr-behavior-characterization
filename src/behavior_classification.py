@@ -1,14 +1,18 @@
 from utils import beautiful_padded, clusters_intersection_1vsmany
 from indexes import *
 from cluster import Cluster, VSR
-from worm_clusters import *
-from biped_clusters import *
 
 import pandas as pd
 import numpy as np
-import sys
-import csv
 from itertools import product
+
+import os, sys
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir + "/dataset")
+
+from worm_clusters import *
+from biped_clusters import *
 
 from sklearn.cluster import KMeans
 
@@ -34,7 +38,8 @@ if len(sys.argv) > 1:
 else:
     n_clusters = 3
 
-# allocate supervised clusters
+# ------------------------------------------------------
+# allocate and fill supervised clusters
 supervised_clusters = []
 
 for label, bp, wm in zip(
@@ -54,6 +59,7 @@ for label, bp, wm in zip(
             cl.add(
                 VSR(shape="worm-5x2", training_terrain=item[0], seed=item[1])
             )
+# ------------------------------------------------------
 
 # we define some mappings (i.e. weights) for the predictor 'avg.touch.area'
 avg_touch_area_mappings = []
@@ -83,6 +89,7 @@ for mi, nfoot, nuniquefoot, purity_degree in product(
             mi, nfoot, nuniquefoot, purity_degree
         )
     )
+# ------------------------------------------------------
 
 
 # we consider these two set of columns the key predictors
@@ -108,6 +115,7 @@ concatenated_training_data = pd.concat(
 
 # predictors used for unsupervised learning
 X = concatenated_training_data[columns]
+# ------------------------------------------------------
 
 ata_key = "best→fitness→as[Outcome]→gait→avg.touch.area"
 
@@ -186,15 +194,3 @@ for avg_touch_mapping, avg_touch_label in zip(
                     clusters[i], supervised_clusters
                 )
             )
-
-    # print(beautiful_padded("SEED", " ".join(map(str, range(10)))))
-    # print("-" * 40 + "-" * 2 * len(training_data))
-    # for k, l in dc.items():
-    #     print(beautiful_padded(str(k) + " ->    ", " ".join(l)))
-
-    # with open("dataset/clusters.csv", "w") as f:
-    #     writer = csv.writer(f)
-    #     for t, s in dc.keys():
-    #         lb = dc[(t, s)]
-    #         row = [t, s, *lb]
-    #         writer.writerow(row)
