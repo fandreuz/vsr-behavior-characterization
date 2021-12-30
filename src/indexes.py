@@ -7,23 +7,23 @@ import numpy as np
 # the dynamics of the VSR. if the mode interval is big (with respect to the
 # bigger mode interval of the dataset) we deduce that the main footprints are
 # less important.
-def kmi(X):
+def k_mode_interval(X):
     longest_interval = np.max(X["best→fitness→as[Outcome]→gait→mode.interval"])
     return longest_interval / X["best→fitness→as[Outcome]→gait→mode.interval"]
 
 
-# like kpmi, but consider also the "purity" (how many intervals are equal to
+# onsider also the "purity" (how many intervals are equal to
 # the mode interval?). obviously if purity=1, kmi is very significant. as
 # purity->0 the significance decreases (the degree of decrease may vary, if
 # the degree is high the decrease in significance is very fast).
-def kpmi(X, degree=2):
-    return kmi(X) * np.power(X["best→fitness→as[Outcome]→gait→purity"], degree)
+def k_purity(X, degree=2):
+    return np.power(X["best→fitness→as[Outcome]→gait→purity"], degree)
 
 
 # if the number of footprints in the main gait is low, it means that the
 # framework struggled to find recurrent patterns in the footprints. which means
 # that the patterns it found (struggling) may be assumed to be less significant.
-def k_nfoorprints(X):
+def k_nfootprints(X):
     longest_main_footprint = np.max(
         X["best→fitness→as[Outcome]→gait→num.footprints"]
     )
