@@ -120,74 +120,91 @@ concatenated_training_data = pd.concat(
 X = concatenated_training_data[columns]
 # ------------------------------------------------------
 
+avg_touch_area_weights = [1, 2, 5, 10, 100]
+
+# ------------------------------------------------------
+
 ata_key = "best→fitness→as[Outcome]→gait→avg.touch.area"
 
 # an array of arrays of clusters
 experiment_clusters = []
 errs = []
+experiment_labels = []
 
 for avg_touch_mapping, avg_touch_label in zip(
     avg_touch_area_mappings, avg_touch_are_labels
 ):
-    print("-" * len(avg_touch_label))
-    print(avg_touch_label)
-    print(
-        "max(avg.touch.mapping)",
-        avg_touch_mapping(concatenated_training_data).max(),
-    )
-    weighted_avg_touch = concatenated_training_data[
-        ata_key
-    ] * avg_touch_mapping(concatenated_training_data)
-    if not ata_key in X.columns:
-        X.insert(0, ata_key, weighted_avg_touch, allow_duplicates=True)
-    else:
-        X = X.assign(**{ata_key: weighted_avg_touch})
+    for avg_touch_area_w in avg_touch_area_weights:
+        print("-" * len(avg_touch_label))
+        print(avg_touch_label)
+        print(
+            "max(avg.touch.mapping)",
+            avg_touch_mapping(concatenated_training_data).max(),
+        )
+        weighted_avg_touch = concatenated_training_data[
+            ata_key
+        ] * avg_touch_mapping(concatenated_training_data)
+        if not ata_key in X.columns:
+            X.insert(0, ata_key, weighted_avg_touch, allow_duplicates=True)
+        else:
+            X = X.assign(**{ata_key: weighted_avg_touch})
 
-    # unsupervised learning engine
-    kmeans = KMeans(n_clusters=n_clusters, algorithm="full").fit(X)
+        # setup weights
+        weights = np.ones(len(X.columns))
+        weights[0] = avg_touch_area_w
 
-    # these are our clusters
-    labels = kmeans.labels_
-
-    clusters = tuple(Cluster(name=str(i)) for i in range(n_clusters))
-    experiment_clusters.append(clusters)
-
-    l = X.shape[0] // len(training)
-    # we iterate over the files (i.e. the seed)
-    for i in range(len(training)):
-        # for each row we want to extract terrain/shape, and the cluster that
-        # robot was assigned to
-        for row, label in zip(
-            training_data[i][
-                training_data[i]["iterations"] == 204
-            ].itertuples(),
-            labels[l * i : l * (i + 1)],
-        ):
-            # we add the VSR to the cluster which it was assigned to
-            clusters[label].add(
-                VSR(shape=row.shape, training_terrain=row.terrain, seed=i)
-            )
-
-    if visual_clusters_intersection:
-        clusters_comparison(
-            clusters, "New", supervised_clusters, "Sup", n_clusters
+        # unsupervised learning engine
+        kmeans = KMeans(n_clusters=n_clusters, algorithm="full").fit(
+            X, weights
         )
 
-    err = clusters_error(clusters, supervised_clusters)
-    print("Errors: " + str(err))
-    errs.append(err)
+        # these are our clusters
+        labels = kmeans.labels_
+
+        clusters = tuple(Cluster(name=str(i)) for i in range(n_clusters))
+        experiment_clusters.append(clusters)
+
+        l = X.shape[0] // len(training)
+        # we iterate over the files (i.e. the seed)
+        for i in range(len(training)):
+            # for each row we want to extract terrain/shape, and the cluster that
+            # robot was assigned to
+            for row, label in zip(
+                training_data[i][
+                    training_data[i]["iterations"] == 204
+                ].itertuples(),
+                labels[l * i : l * (i + 1)],
+            ):
+                # we add the VSR to the cluster which it was assigned to
+                clusters[label].add(
+                    VSR(shape=row.shape, training_terrain=row.terrain, seed=i)
+                )
+
+        if visual_clusters_intersection:
+            clusters_comparison(
+                clusters, "New", supervised_clusters, "Sup", n_clusters
+            )
+
+        err = clusters_error(clusters, supervised_clusters)
+        print("Errors: " + str(err))
+        errs.append(err)
+
+        experiment_labels.append(
+            avg_touch_label
+            + ", avg_touch_area weight={}".format(avg_touch_area_w)
+        )
 
 errs = np.array(errs)
 best = np.argmin(errs)
 
 print(
     "The best combination ({}) leads to {}/{} errors".format(
-        avg_touch_are_labels[best],
+        experiment_labels[best],
         errs[best],
         sum(map(lambda s: len(s._items), supervised_clusters)),
     )
 )
 
-print('Same error in: ')
+print("Same error in: ")
 for i in np.where(errs == errs[best])[0]:
-    print(avg_touch_are_labels[i])
+    print(experiment_labels[i])
