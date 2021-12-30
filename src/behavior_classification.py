@@ -123,7 +123,7 @@ X = concatenated_training_data[columns].values
 
 # normalize spectrum
 if normalize_spectra:
-    print('Normalizing data')
+    print("Normalizing data")
     X -= np.mean(X)
 
     vr = np.std(X)
@@ -151,8 +151,9 @@ for avg_touch_mapping, avg_touch_label in zip(
     avg_touch_area_mappings, avg_touch_are_labels
 ):
     for avg_touch_area_w in avg_touch_area_weights:
-        experiment_label = avg_touch_label + ", avg_touch_area weight={}".format(
-            avg_touch_area_w
+        experiment_label = (
+            avg_touch_label
+            + ", avg_touch_area weight={}".format(avg_touch_area_w)
         )
 
         print("-" * len(avg_touch_label))
@@ -161,7 +162,7 @@ for avg_touch_mapping, avg_touch_label in zip(
         weighted_avg_touch = concatenated_training_data[
             ata_key
         ] * avg_touch_mapping(concatenated_training_data)
-        X[:,0] = weighted_avg_touch
+        X[:, 0] = weighted_avg_touch
 
         # setup KMeans weights
         weights = np.ones(X.shape[1])
@@ -169,7 +170,7 @@ for avg_touch_mapping, avg_touch_label in zip(
 
         # unsupervised learning engine
         kmeans = KMeans(n_clusters=n_clusters, algorithm="full").fit(
-            X, weights
+            X * weights
         )
 
         # these are our clusters
