@@ -1,4 +1,4 @@
-from utils import beautiful_padded, clusters_intersection_1vsmany
+from utils import beautiful_padded, clusters_comparison
 from indexes import *
 from cluster import Cluster, VSR
 
@@ -7,6 +7,7 @@ import numpy as np
 from itertools import product
 
 import os, sys
+
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir + "/dataset")
@@ -167,30 +168,6 @@ for avg_touch_mapping, avg_touch_label in zip(
                 VSR(shape=row.shape, training_terrain=row.terrain, seed=i)
             )
 
-    n_pad = 10
-
-    print(" " * (n_pad + 3) + "Super".center(n_clusters * 2))
-    print(
-        " " * (n_pad + 3)
-        + " ".join(map(lambda s: s.ljust(3), map(str, range(n_clusters))))
+    clusters_comparison(
+        clusters, "New", supervised_clusters, "Sup", n_clusters
     )
-    print(" " * (n_pad + 3) + "-" * (n_clusters * 3 + n_clusters - 1))
-    for i in range(n_clusters):
-        if i == n_clusters // 2:
-            print(
-                "New".center(n_pad)
-                + str(i)
-                + "| "
-                + clusters_intersection_1vsmany(
-                    clusters[i], supervised_clusters
-                )
-            )
-        else:
-            print(
-                " " * n_pad
-                + str(i)
-                + "| "
-                + clusters_intersection_1vsmany(
-                    clusters[i], supervised_clusters
-                )
-            )
