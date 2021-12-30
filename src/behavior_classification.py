@@ -1,5 +1,6 @@
-from utils import beautiful_padded
+from utils import beautiful_padded, clusters_intersection_1vsmany
 from indexes import *
+from cluster import Cluster, VSR
 
 import pandas as pd
 import numpy as np
@@ -27,9 +28,9 @@ from sklearn.cluster import KMeans
 # gait->footprints'    : Comma-separated list of footprints in the main n-gram.
 
 if len(sys.argv) > 1:
-    clusters = int(sys.argv[1])
+    n_clusters = int(sys.argv[1])
 else:
-    clusters = 3
+    n_clusters = 3
 
 # we define some mappings (i.e. weights) for the predictor 'avg.touch.area'
 avg_touch_area_mappings = []
@@ -75,8 +76,13 @@ X = concatenated_training_data[columns]
 
 ata_key = "best→fitness→as[Outcome]→gait→avg.touch.area"
 
+# an array of arrays of clusters
+experiment_clusters = []
+
 for avg_touch_mapping in avg_touch_area_mappings:
-    print('avg touh mapping', avg_touch_mapping(concatenated_training_data).max())
+    print(
+        "avg touh mapping", avg_touch_mapping(concatenated_training_data).max()
+    )
     weighted_avg_touch = concatenated_training_data[
         ata_key
     ] * avg_touch_mapping(concatenated_training_data)
@@ -89,34 +95,65 @@ for avg_touch_mapping in avg_touch_area_mappings:
     # print(np.max(X[ata_key]), np.min(X[ata_key]), np.max(Xv), np.min(Xv))
 
     # unsupervised learning engine
-    kmeans = KMeans(n_clusters=clusters, algorithm="full").fit(X)
+    kmeans = KMeans(n_clusters=n_clusters, algorithm="full").fit(X)
 
     # these are our clusters
     labels = kmeans.labels_
 
-    dc = {}
+    clusters = tuple(Cluster(name=str(i)) for i in range(n_clusters))
+    experiment_clusters.append(clusters)
 
     l = X.shape[0] // len(training)
+    # we iterate over the files (i.e. the seed)
     for i in range(len(training)):
+        # for each row we want to extract terrain/shape, and the cluster that
+        # robot was assigned to
         for row, label in zip(
             training_data[i][
                 training_data[i]["iterations"] == 204
             ].itertuples(),
             labels[l * i : l * (i + 1)],
         ):
-            key = (row.terrain, row.shape)
-            if key not in dc:
-                dc[key] = []
-            dc[key].append(str(label))
+            # we add the VSR to the cluster which it was assigned to
+            clusters[label].add(
+                VSR(shape=row.shape, training_terrain=row.terrain, seed=i)
+            )
 
-    print(beautiful_padded("SEED", " ".join(map(str, range(10)))))
-    print("-" * 40 + "-" * 2 * len(training_data))
-    for k, l in dc.items():
-        print(beautiful_padded(str(k) + " ->    ", " ".join(l)))
+    if len(experiment_clusters) >= 2:
+        n_pad = 10
 
-    with open("dataset/clusters.csv", "w") as f:
-        writer = csv.writer(f)
-        for t, s in dc.keys():
-            lb = dc[(t, s)]
-            row = [t, s, *lb]
-            writer.writerow(row)
+        old_clusters = experiment_clusters[-2]
+
+        print(" " * (n_pad + 3) + "Old".center(n_clusters * 2))
+        print(
+            " " * (n_pad + 3)
+            + " ".join(map(lambda s: s.ljust(3), map(str, range(n_clusters))))
+        )
+        print(" " * (n_pad + 3) + "-" * (n_clusters * 3 + n_clusters - 1))
+        for i in range(n_clusters):
+            if i == n_clusters // 2:
+                print(
+                    "New".center(n_pad)
+                    + str(i)
+                    + "| "
+                    + clusters_intersection_1vsmany(clusters[i], old_clusters)
+                )
+            else:
+                print(
+                    " " * n_pad
+                    + str(i)
+                    + "| "
+                    + clusters_intersection_1vsmany(clusters[i], old_clusters)
+                )
+
+    # print(beautiful_padded("SEED", " ".join(map(str, range(10)))))
+    # print("-" * 40 + "-" * 2 * len(training_data))
+    # for k, l in dc.items():
+    #     print(beautiful_padded(str(k) + " ->    ", " ".join(l)))
+
+    # with open("dataset/clusters.csv", "w") as f:
+    #     writer = csv.writer(f)
+    #     for t, s in dc.keys():
+    #         lb = dc[(t, s)]
+    #         row = [t, s, *lb]
+    #         writer.writerow(row)
