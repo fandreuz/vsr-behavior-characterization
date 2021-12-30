@@ -1,6 +1,8 @@
 from utils import beautiful_padded, clusters_intersection_1vsmany
 from indexes import *
 from cluster import Cluster, VSR
+from worm_clusters import *
+from biped_clusters import *
 
 import pandas as pd
 import numpy as np
@@ -31,6 +33,27 @@ if len(sys.argv) > 1:
     n_clusters = int(sys.argv[1])
 else:
     n_clusters = 3
+
+# allocate supervised clusters
+supervised_clusters = []
+
+for label, bp, wm in zip(
+    ["Crawling", "Waling", "Jumping", "Rolling"],
+    [biped_crawling, biped_walking, biped_jumping, biped_rolling],
+    [worm_crawling, worm_walking, worm_jumping, []],
+):
+    if n_clusters > 3 or label != "Rolling":
+        cl = Cluster(name=label)
+        supervised_clusters.append(cl)
+
+        for item in biped_walking:
+            cl.add(
+                VSR(shape="biped-4x3", training_terrain=item[0], seed=item[1])
+            )
+        for item in worm_walking:
+            cl.add(
+                VSR(shape="worm-5x2", training_terrain=item[0], seed=item[1])
+            )
 
 # we define some mappings (i.e. weights) for the predictor 'avg.touch.area'
 avg_touch_area_mappings = []
@@ -136,32 +159,33 @@ for avg_touch_mapping, avg_touch_label in zip(
                 VSR(shape=row.shape, training_terrain=row.terrain, seed=i)
             )
 
-    if len(experiment_clusters) >= 2:
-        n_pad = 10
+    n_pad = 10
 
-        old_clusters = experiment_clusters[-2]
-
-        print(" " * (n_pad + 3) + "Old".center(n_clusters * 2))
-        print(
-            " " * (n_pad + 3)
-            + " ".join(map(lambda s: s.ljust(3), map(str, range(n_clusters))))
-        )
-        print(" " * (n_pad + 3) + "-" * (n_clusters * 3 + n_clusters - 1))
-        for i in range(n_clusters):
-            if i == n_clusters // 2:
-                print(
-                    "New".center(n_pad)
-                    + str(i)
-                    + "| "
-                    + clusters_intersection_1vsmany(clusters[i], old_clusters)
+    print(" " * (n_pad + 3) + "Super".center(n_clusters * 2))
+    print(
+        " " * (n_pad + 3)
+        + " ".join(map(lambda s: s.ljust(3), map(str, range(n_clusters))))
+    )
+    print(" " * (n_pad + 3) + "-" * (n_clusters * 3 + n_clusters - 1))
+    for i in range(n_clusters):
+        if i == n_clusters // 2:
+            print(
+                "New".center(n_pad)
+                + str(i)
+                + "| "
+                + clusters_intersection_1vsmany(
+                    clusters[i], supervised_clusters
                 )
-            else:
-                print(
-                    " " * n_pad
-                    + str(i)
-                    + "| "
-                    + clusters_intersection_1vsmany(clusters[i], old_clusters)
+            )
+        else:
+            print(
+                " " * n_pad
+                + str(i)
+                + "| "
+                + clusters_intersection_1vsmany(
+                    clusters[i], supervised_clusters
                 )
+            )
 
     # print(beautiful_padded("SEED", " ".join(map(str, range(10)))))
     # print("-" * 40 + "-" * 2 * len(training_data))
