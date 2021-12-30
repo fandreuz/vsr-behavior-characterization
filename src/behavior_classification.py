@@ -68,9 +68,9 @@ for label, bp, wm in zip(
 avg_touch_area_mappings = []
 avg_touch_are_labels = []
 
-coeffs_grid = [0.1, 0.2, 0.5, 0.75, 1, 1.5]
+coeffs_grid = [0, 0.1, 0.2, 0.5, 0.75, 1, 1.5, 5, 10]
 for mi, nfoot, nuniquefoot, purity_degree in product(
-    coeffs_grid, coeffs_grid, coeffs_grid, [0, 1, 2, 3, 4]
+    coeffs_grid, coeffs_grid, coeffs_grid, [0, 1, 2, 3, 4, 5]
 ):
 
     def mppng(
@@ -143,9 +143,6 @@ for avg_touch_mapping, avg_touch_label in zip(
     else:
         X = X.assign(**{ata_key: weighted_avg_touch})
 
-    Xv = X.melt().value
-    # print(np.max(X[ata_key]), np.min(X[ata_key]), np.max(Xv), np.min(Xv))
-
     # unsupervised learning engine
     kmeans = KMeans(n_clusters=n_clusters, algorithm="full").fit(X)
 
@@ -190,3 +187,7 @@ print(
         sum(map(lambda s: len(s._items), supervised_clusters)),
     )
 )
+
+print('Same error in: ')
+for i in np.where(errs == errs[best])[0]:
+    print(avg_touch_are_labels[i])
