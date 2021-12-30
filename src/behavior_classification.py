@@ -16,6 +16,7 @@ from worm_clusters import *
 from biped_clusters import *
 
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 
 # ----- Interpreting Gait -----
 # gait->avg.touch.area : M* is an n-gram of footprints m_i. touch_area is the
@@ -40,6 +41,7 @@ else:
     n_clusters = 3
 
 visual_clusters_intersection = False
+normalize_spectra = True
 
 # ------------------------------------------------------
 # allocate and fill supervised clusters
@@ -117,7 +119,21 @@ concatenated_training_data = pd.concat(
 )
 
 # predictors used for unsupervised learning
-X = concatenated_training_data[columns]
+X = concatenated_training_data[columns].values
+
+# normalize spectrum
+if normalize_spectra:
+    print('Normalizing data')
+    X -= np.mean(X)
+
+    vr = np.std(X)
+    if vr == 0:
+        vr = 1
+    X /= vr
+
+# add space for average touch area
+X = np.hstack([np.zeros((X.shape[0], 1)), X])
+
 # ------------------------------------------------------
 
 avg_touch_area_weights = [1, 2, 5, 10, 100]
@@ -135,22 +151,20 @@ for avg_touch_mapping, avg_touch_label in zip(
     avg_touch_area_mappings, avg_touch_are_labels
 ):
     for avg_touch_area_w in avg_touch_area_weights:
-        print("-" * len(avg_touch_label))
-        print(avg_touch_label)
-        print(
-            "max(avg.touch.mapping)",
-            avg_touch_mapping(concatenated_training_data).max(),
+        experiment_label = avg_touch_label + ", avg_touch_area weight={}".format(
+            avg_touch_area_w
         )
+
+        print("-" * len(avg_touch_label))
+        print(experiment_label)
+
         weighted_avg_touch = concatenated_training_data[
             ata_key
         ] * avg_touch_mapping(concatenated_training_data)
-        if not ata_key in X.columns:
-            X.insert(0, ata_key, weighted_avg_touch, allow_duplicates=True)
-        else:
-            X = X.assign(**{ata_key: weighted_avg_touch})
+        X[:,0] = weighted_avg_touch
 
-        # setup weights
-        weights = np.ones(len(X.columns))
+        # setup KMeans weights
+        weights = np.ones(X.shape[1])
         weights[0] = avg_touch_area_w
 
         # unsupervised learning engine
@@ -189,10 +203,7 @@ for avg_touch_mapping, avg_touch_label in zip(
         print("Errors: " + str(err))
         errs.append(err)
 
-        experiment_labels.append(
-            avg_touch_label
-            + ", avg_touch_area weight={}".format(avg_touch_area_w)
-        )
+        experiment_labels.append(experiment_label)
 
 errs = np.array(errs)
 best = np.argmin(errs)
