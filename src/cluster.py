@@ -21,6 +21,10 @@ class Cluster:
     def size(self):
         return len(self._items)
 
+    @property
+    def name(self):
+        return self._name
+
     def save(self, name='clusters.csv'):
         with open("dataset/clusters.csv", "w") as f:
             writer = csv.writer(f)

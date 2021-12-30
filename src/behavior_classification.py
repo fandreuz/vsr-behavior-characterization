@@ -49,7 +49,7 @@ random_samples = True
 supervised_clusters = []
 
 for label, bp, wm in zip(
-    ["Crawling", "Waling", "Jumping", "Rolling"],
+    ["Crawling", "Walking", "Jumping", "Rolling"],
     [biped_crawling, biped_walking, biped_jumping, biped_rolling],
     [worm_crawling, worm_walking, worm_jumping, []],
 ):
@@ -144,7 +144,8 @@ ata_key = "best→fitness→as[Outcome]→gait→avg.touch.area"
 
 # an array of arrays of clusters
 experiment_clusters = []
-errs = []
+experiment_errs = []
+experiment_err_details = []
 experiment_labels = []
 
 for avg_touch_mapping, avg_touch_label in zip(
@@ -170,7 +171,10 @@ for avg_touch_mapping, avg_touch_label in zip(
 
         if random_samples:
             random_columns = np.concatenate(
-                [[0, 1], np.random.randint(2, X.shape[1], (X.shape[1] - 2) // 2)]
+                [
+                    [0, 1],
+                    np.random.randint(2, X.shape[1], (X.shape[1] - 2) // 2),
+                ]
             )
         else:
             random_columns = np.arange(0, X.shape[1])
@@ -207,23 +211,31 @@ for avg_touch_mapping, avg_touch_label in zip(
                 clusters, "New", supervised_clusters, "Sup", n_clusters
             )
 
-        err = clusters_error(clusters, supervised_clusters)
+        err, err_details = clusters_error(clusters, supervised_clusters)
         print("Errors: " + str(err))
-        errs.append(err)
+        experiment_errs.append(err)
+        experiment_err_details.append(err_details)
 
         experiment_labels.append(experiment_label)
 
-errs = np.array(errs)
-best = np.argmin(errs)
+experiment_errs = np.array(experiment_errs)
+experiment_err_details = np.array(experiment_err_details)
+best = np.argmin(experiment_errs)
 
 print(
     "The best combination ({}) leads to {}/{} errors".format(
         experiment_labels[best],
-        errs[best],
+        experiment_errs[best],
         sum(map(lambda s: len(s._items), supervised_clusters)),
     )
 )
+for i in range(len(experiment_err_details[best])):
+    print(
+        "- {} robots wrongly put into the (supervised) cluster {}".format(
+            experiment_err_details[best,i], supervised_clusters[i].name
+        )
+    )
 
-print("Same error in: ")
-for i in np.where(errs == errs[best])[0]:
+print("\nSame error in: ")
+for i in np.where(experiment_errs == experiment_errs[best])[0]:
     print(experiment_labels[i])

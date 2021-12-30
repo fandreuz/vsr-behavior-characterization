@@ -75,4 +75,4 @@ def clusters_error(clusters, supervised_cls):
     max_idxes = np.argmax(intersections, axis=1)
     for i in range(len(clusters)):
         intersections[i, max_idxes[i]] = 0
-    return np.sum(intersections)
+    return np.sum(intersections), np.sum(intersections, axis=0)
