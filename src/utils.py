@@ -1,3 +1,5 @@
+import numpy as np
+
 def beautiful_padded(key, value, n_pad=40):
     return "{}{}{}".format(
         key,
@@ -54,3 +56,23 @@ def clusters_comparison(
                 + "| "
                 + clusters_intersection_1vsmany(cls1[i], cls2)
             )
+
+# compute the error committed in clusters, which is defined as the sum of the
+# elements on each row that are not the row-wise maximum
+# Example:
+#
+# 0  1  5
+# 1  1  7
+# 10 0  0
+#
+# the error in this case is 3
+def clusters_error(clusters, supervised_cls):
+    intersections = np.zeros((len(clusters), len(supervised_cls)), dtype=int)
+    for i in range(len(clusters)):
+        for j in range(len(supervised_cls)):
+            intersections[i,j] = len(clusters[i].intersect(supervised_cls[j]))
+
+    max_idxes = np.argmax(intersections, axis=1)
+    for i in range(len(clusters)):
+        intersections[i, max_idxes[i]] = 0
+    return np.sum(intersections)

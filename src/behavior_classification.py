@@ -1,4 +1,4 @@
-from utils import beautiful_padded, clusters_comparison
+from utils import beautiful_padded, clusters_comparison, clusters_error
 from indexes import *
 from cluster import Cluster, VSR
 
@@ -38,6 +38,8 @@ if len(sys.argv) > 1:
     n_clusters = int(sys.argv[1])
 else:
     n_clusters = 3
+
+visual_clusters_intersection = False
 
 # ------------------------------------------------------
 # allocate and fill supervised clusters
@@ -122,6 +124,7 @@ ata_key = "best→fitness→as[Outcome]→gait→avg.touch.area"
 
 # an array of arrays of clusters
 experiment_clusters = []
+errs = []
 
 for avg_touch_mapping, avg_touch_label in zip(
     avg_touch_area_mappings, avg_touch_are_labels
@@ -168,6 +171,22 @@ for avg_touch_mapping, avg_touch_label in zip(
                 VSR(shape=row.shape, training_terrain=row.terrain, seed=i)
             )
 
-    clusters_comparison(
-        clusters, "New", supervised_clusters, "Sup", n_clusters
+    if visual_clusters_intersection:
+        clusters_comparison(
+            clusters, "New", supervised_clusters, "Sup", n_clusters
+        )
+
+    err = clusters_error(clusters, supervised_clusters)
+    print("Errors: " + str(err))
+    errs.append(err)
+
+errs = np.array(errs)
+best = np.argmin(errs)
+
+print(
+    "The best combination ({}) leads to {}/{} errors".format(
+        avg_touch_are_labels[best],
+        errs[best],
+        sum(map(lambda s: len(s._items), supervised_clusters)),
     )
+)
