@@ -34,20 +34,32 @@ else:
 
 # we define some mappings (i.e. weights) for the predictor 'avg.touch.area'
 avg_touch_area_mappings = []
+avg_touch_are_labels = []
+
 coeffs_grid = [0.1, 0.2, 0.5, 0.75, 1, 1.5]
-for mi, p, nfoot, nuniquefoot in product(
-    coeffs_grid, coeffs_grid, coeffs_grid, coeffs_grid
+for mi, nfoot, nuniquefoot, purity_degree in product(
+    coeffs_grid, coeffs_grid, coeffs_grid, [0, 1, 2, 3, 4]
 ):
 
-    def mppng(X, mi=mi, p=p, nfoot=nfoot, nuniquefoot=nuniquefoot):
+    def mppng(
+        X,
+        mi=mi,
+        nfoot=nfoot,
+        nuniquefoot=nuniquefoot,
+        pd=purity_degree,
+    ):
         return (
-            mi * k_mode_interval(X)
-            + p * k_purity(X)
+            mi * k_mode_interval(X) * k_purity(X, degree=pd)
             + nfoot * k_nfootprints(X)
             + nuniquefoot * k_unique_foorprints(X)
         )
 
     avg_touch_area_mappings.append(mppng)
+    avg_touch_are_labels.append(
+        "mode_interval_cff={}, n_footprints_cff={}, n_unique_footprints_cff={}, purity_degree={}".format(
+            mi, nfoot, nuniquefoot, purity_degree
+        )
+    )
 
 
 # we consider these two set of columns the key predictors
@@ -79,9 +91,14 @@ ata_key = "best→fitness→as[Outcome]→gait→avg.touch.area"
 # an array of arrays of clusters
 experiment_clusters = []
 
-for avg_touch_mapping in avg_touch_area_mappings:
+for avg_touch_mapping, avg_touch_label in zip(
+    avg_touch_area_mappings, avg_touch_are_labels
+):
+    print("-" * len(avg_touch_label))
+    print(avg_touch_label)
     print(
-        "avg touh mapping", avg_touch_mapping(concatenated_training_data).max()
+        "max(avg.touch.mapping)",
+        avg_touch_mapping(concatenated_training_data).max(),
     )
     weighted_avg_touch = concatenated_training_data[
         ata_key
