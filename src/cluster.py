@@ -25,7 +25,7 @@ class Cluster:
     def name(self):
         return self._name
 
-    def save(self, name='clusters.csv'):
+    def save(self, name="clusters.csv"):
         with open("dataset/clusters.csv", "w") as f:
             writer = csv.writer(f)
             for t, s in dc.keys():
@@ -40,4 +40,4 @@ class Cluster:
         return str(self)
 
     def __str__(self):
-        return "[" + "; ".join(map(str, self._items)) + "]\n"
+        return self._name + " --> [" + "; ".join(map(str, self._items)) + "]\n"
