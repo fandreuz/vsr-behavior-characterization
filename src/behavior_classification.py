@@ -1,4 +1,4 @@
-from utils import beautiful_padded, clusters_comparison, clusters_error
+from utils import clusters_comparison, clusters_intersection_table
 from indexes import *
 from cluster import Cluster, VSR
 
@@ -40,9 +40,12 @@ if len(sys.argv) > 1:
 else:
     n_clusters = 3
 
-visual_clusters_intersection = False
+if len(sys.argv) > 2:
+    random_samples = bool(int(sys.argv[2]))
+else:
+    random_samples = False
+
 normalize_spectra = True
-random_samples = True
 
 # ------------------------------------------------------
 # allocate and fill supervised clusters
@@ -147,6 +150,8 @@ experiment_clusters = []
 experiment_errs = []
 experiment_err_details = []
 experiment_labels = []
+# map supervised cluster to the corresponding unsupervised cluster
+experiment_super_to_unsuper = []
 
 for avg_touch_mapping, avg_touch_label in zip(
     avg_touch_area_mappings, avg_touch_are_labels
@@ -178,6 +183,7 @@ for avg_touch_mapping, avg_touch_label in zip(
             )
         else:
             random_columns = np.arange(0, X.shape[1])
+        print('Using the following columns: ' + str(random_columns))
 
         # unsupervised learning engine
         kmeans = KMeans(n_clusters=n_clusters, algorithm="full").fit(
@@ -206,20 +212,21 @@ for avg_touch_mapping, avg_touch_label in zip(
                     VSR(shape=row.shape, training_terrain=row.terrain, seed=i)
                 )
 
-        if visual_clusters_intersection:
-            clusters_comparison(
-                clusters, "New", supervised_clusters, "Sup", n_clusters
-            )
-
-        err, err_details = clusters_error(clusters, supervised_clusters)
+        err, err_details, mapping = clusters_comparison(
+            clusters, supervised_clusters
+        )
         print("Errors: " + str(err))
+
         experiment_errs.append(err)
         experiment_err_details.append(err_details)
+        experiment_super_to_unsuper.append(mapping)
 
         experiment_labels.append(experiment_label)
 
 experiment_errs = np.array(experiment_errs)
 experiment_err_details = np.array(experiment_err_details)
+experiment_super_to_unsuper = np.array(experiment_super_to_unsuper)
+
 best = np.argmin(experiment_errs)
 
 print(
@@ -229,12 +236,33 @@ print(
         sum(map(lambda s: len(s._items), supervised_clusters)),
     )
 )
-for i in range(len(experiment_err_details[best])):
+print("\n------- Number of misclassified robots")
+for i in range(len(supervised_clusters)):
     print(
-        "- {} robots wrongly put into the (supervised) cluster {}".format(
-            experiment_err_details[best,i], supervised_clusters[i].name
+        "- {} robots wrongly put into the (supervised) cluster {};".format(
+            experiment_err_details[best, i], supervised_clusters[i].name
         )
     )
+print("\n------- Size of unsupervised clusters")
+print('Mapping: ' + str(experiment_super_to_unsuper[best]))
+for i in range(len(supervised_clusters)):
+    print(
+        "- The supervised cluster {} got {} out of {} expected robots;".format(
+            supervised_clusters[i].name,
+            experiment_clusters[best][
+                experiment_super_to_unsuper[best, i]
+            ].size(),
+            supervised_clusters[i].size(),
+        )
+    )
+print("\n------- Clusters intersection table")
+clusters_intersection_table(
+    experiment_clusters[best],
+    "Unsuper",
+    supervised_clusters,
+    "Super",
+    n_clusters,
+)
 
 print("\nSame error in: ")
 for i in np.where(experiment_errs == experiment_errs[best])[0]:
