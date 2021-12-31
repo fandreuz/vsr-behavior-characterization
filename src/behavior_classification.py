@@ -213,7 +213,7 @@ for avg_touch_mapping, avg_touch_label in zip(
                 )
 
         err, err_details, mapping = clusters_comparison(
-            clusters, supervised_clusters
+            clusters, supervised_clusters, relative_intersection_error=True
         )
         print("Errors: " + str(err))
 
@@ -229,6 +229,7 @@ experiment_super_to_unsuper = np.array(experiment_super_to_unsuper)
 
 best = np.argmin(experiment_errs)
 
+print('\n-------------------- RESULTS ---------------------')
 print(
     "The best combination ({}) leads to {}/{} errors".format(
         experiment_labels[best],
