@@ -16,8 +16,7 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir + "/dataset")
 
-from worm_clusters import *
-from biped_clusters import *
+from supervised_clusters import *
 
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
@@ -91,7 +90,7 @@ supervised_clusters = []
 for label, bp, wm in zip(
     ["Crawling", "Walking", "Jumping", "Rolling"],
     [biped_crawling, biped_walking, biped_jumping, biped_rolling],
-    [worm_crawling, worm_walking, worm_jumping, []],
+    [worm_crawling, worm_walking, worm_jumping, worm_rolling],
 ):
     if n_clusters > 3 or label != "Rolling":
         cl = Cluster(name=label)
