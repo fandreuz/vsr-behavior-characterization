@@ -1,8 +1,9 @@
-from utils import (
+from reporting_utils import (
     clusters_comparison,
     clusters_intersection_table,
     report_results,
 )
+from experiment_utils import run_experiment
 from indexes import *
 from cluster import Cluster, VSR
 
@@ -18,7 +19,6 @@ sys.path.append(parentdir + "/dataset")
 
 from supervised_clusters import *
 
-from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
 # ----- Interpreting Gait -----
@@ -38,48 +38,10 @@ from sklearn.preprocessing import StandardScaler
 # gait->num.unique.footprints' : Number of unique footprints in the n-gram.
 # gait->footprints'    : Comma-separated list of footprints in the main n-gram.
 
-
-# run an unsupervised learning classification using the given X. return the
-# clusters found in the experiment
-def run_experiment(X, training_data):
-    # unsupervised learning engine
-    kmeans = KMeans(n_clusters=n_clusters, algorithm="full").fit(
-        (X * weights)[:, random_columns]
-    )
-
-    # these are our clusters
-    labels = kmeans.labels_
-
-    clusters = tuple(Cluster(name=str(i)) for i in range(n_clusters))
-
-    l = X.shape[0] // len(training_data)
-    # we iterate over the files (i.e. the seed)
-    for i in range(len(training_data)):
-        # for each row we want to extract terrain/shape, and the cluster that
-        # robot was assigned to
-        for row, label in zip(
-            training_data[i][
-                training_data[i]["iterations"] == 204
-            ].itertuples(),
-            labels[l * i : l * (i + 1)],
-        ):
-            # we add the VSR to the cluster which it was assigned to
-            clusters[label].add(
-                VSR(shape=row.shape, training_terrain=row.terrain, seed=i)
-            )
-
-    return clusters
-
-
 if len(sys.argv) > 1:
     n_clusters = int(sys.argv[1])
 else:
     n_clusters = 3
-
-if len(sys.argv) > 2:
-    random_samples = bool(int(sys.argv[2]))
-else:
-    random_samples = False
 
 normalize_spectra = True
 
@@ -192,10 +154,10 @@ experiment_super_to_unsuper = []
 for avg_touch_mapping, avg_touch_label in zip(
     avg_touch_area_mappings, avg_touch_are_labels
 ):
-    for avg_touch_area_w in avg_touch_area_weights:
+    for avg_touch_area_weight in avg_touch_area_weights:
         experiment_label = (
             avg_touch_label
-            + ", avg_touch_area weight={}".format(avg_touch_area_w)
+            + ", avg_touch_area weight={}".format(avg_touch_area_weight)
         )
 
         print("-" * len(avg_touch_label))
@@ -208,20 +170,9 @@ for avg_touch_mapping, avg_touch_label in zip(
 
         # setup KMeans weights
         weights = np.ones(X.shape[1])
-        weights[0] = avg_touch_area_w
+        weights[0] = avg_touch_area_weight
 
-        if random_samples:
-            random_columns = np.concatenate(
-                [
-                    [0, 1],
-                    np.random.randint(2, X.shape[1], (X.shape[1] - 2) // 2),
-                ]
-            )
-        else:
-            random_columns = np.arange(0, X.shape[1])
-        print("Using the following columns: " + str(random_columns))
-
-        clusters = run_experiment(X, training_data)
+        clusters = run_experiment(X, training_data, weights=weights, n_clusters=n_clusters)
         experiment_clusters.append(clusters)
 
         err, err_details, mapping = clusters_comparison(
@@ -256,7 +207,7 @@ for i in np.where(experiment_errs == experiment_errs[best])[0]:
 
 print("\n\n####### Error using unweighted average_touch_area #######")
 X[:, 0] = concatenated_training_data[ata_key].values
-clusters = run_experiment(X, training_data)
+clusters = run_experiment(X, training_data, weights=1, n_clusters=n_clusters)
 err, err_details, mapping = clusters_comparison(clusters, supervised_clusters)
 report_results(
     clusters,
@@ -269,7 +220,7 @@ report_results(
 
 print("\n\n####### Error without average_touch_area #######")
 X = np.delete(X, 0, axis=1)
-clusters = run_experiment(X, training_data)
+clusters = run_experiment(X, training_data, weights=1, n_clusters=n_clusters)
 err, err_details, mapping = clusters_comparison(clusters, supervised_clusters)
 report_results(
     clusters,
