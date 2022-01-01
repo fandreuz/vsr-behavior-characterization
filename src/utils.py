@@ -1,6 +1,8 @@
 import numpy as np
 from itertools import permutations
 
+big_error = 100000000
+
 
 def beautiful_padded(key, value, n_pad=40):
     return "{}{}{}".format(
@@ -45,6 +47,8 @@ def report_results(
         "Super",
         len(clusters),
     )
+    print('\n------- Cluster dump')
+    print('\n'.join(clusters))
 
 
 def clusters_difference_1vsmany(one, many):
@@ -102,6 +106,11 @@ def clusters_intersection_table(
 # intersections_matrix)
 def compute_error(mapping, intersections_matrix):
     for i in range(len(mapping)):
+        # if this is already zero, this mapping is not acceptable: there's
+        # no overlap between the supervised cluster and the unsupervised cluster
+        # cluster associated by the given mapping
+        if intersections_matrix[mapping[i], i] == 0:
+            return big_error, None
         intersections_matrix[mapping[i], i] = 0
     return np.sum(intersections_matrix), np.sum(intersections_matrix, axis=0)
 
@@ -126,7 +135,7 @@ def clusters_comparison(clusters, supervised_cls):
         for j in range(len(supervised_cls)):
             intersections[i, j] = len(clusters[i].intersect(supervised_cls[j]))
 
-    best_total_errors = 100000
+    best_total_errors = big_error
     best_super_errors = None
     best_mapping = None
 
