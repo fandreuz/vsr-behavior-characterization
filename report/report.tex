@@ -1,0 +1,35 @@
+\documentclass{article}
+\usepackage{tabularx,ragged2e,booktabs,caption}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\title{Classification of the behavior of Voxel-Based Soft Robots using
+    Unsupervised Learning}
+\author{Francesco Andreuzzi, Luca Filippi}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Coefficients}
+\begin{gather}
+    k_\text{mi}^i = \left(\frac{x^i_{\text{mode\_interval}}}{\max_i x^i_{\text{mode.interval}}}\right)^{-1} = \frac{\max_i x^i_{\text{mode\_interval}}}{x^i_{\text{mode.interval}}}
+\end{gather}
+
+\begin{gather}
+    k_\text{p}(d) = (x_\text{purity}^i)^d
+\end{gather}
+
+\begin{gather}
+    k_\text{nf}(d) = \frac{x^i_\text{num.footprints}}{\max_i x^i_\text{num.footprints}}
+\end{gather}
+
+\begin{gather}
+    k_\text{nuf}(d) = \frac{x^i_\text{num.footprints}}{x^i_\text{num.unique.footprints}}
+\end{gather}
+
+\end{document}
