@@ -1,3 +1,5 @@
 # Memo
 
-* Remember to explain why we didn't normalize the spectral buckets;
+* Remember to explain how we normalized the spectral buckets;
+* Results:
+  * Two different actors produced the supervised dataset;
