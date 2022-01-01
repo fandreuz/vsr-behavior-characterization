@@ -266,3 +266,16 @@ report_results(
     mapping,
     supervised_clusters,
 )
+
+print("\n\n####### Error without average_touch_area #######")
+X = np.delete(X, 0, axis=1)
+clusters = run_experiment(X, training_data)
+err, err_details, mapping = clusters_comparison(clusters, supervised_clusters)
+report_results(
+    clusters,
+    "without avg_touch_area",
+    err,
+    err_details,
+    mapping,
+    supervised_clusters,
+)
