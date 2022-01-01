@@ -10,6 +10,43 @@ def beautiful_padded(key, value, n_pad=40):
     )
 
 
+def report_results(
+    clusters, clusters_label, error, error_details, mapping, truth_clusters
+):
+    print(
+        "The best combination ({}) leads to {}/{} errors".format(
+            clusters_label,
+            error,
+            sum(map(lambda s: len(s._items), truth_clusters)),
+        )
+    )
+    print("\n------- Number of misclassified robots")
+    for i in range(len(truth_clusters)):
+        print(
+            "- {} robots wrongly put into the (supervised) cluster {};".format(
+                error_details[i], truth_clusters[i].name
+            )
+        )
+    print("\n------- Size of unsupervised clusters")
+    print("Mapping: " + str(mapping))
+    for i in range(len(truth_clusters)):
+        print(
+            "- The supervised cluster {} got {} out of {} expected robots;".format(
+                truth_clusters[i].name,
+                clusters[mapping[i]].size(),
+                truth_clusters[i].size(),
+            )
+        )
+    print("\n------- Clusters intersection table")
+    clusters_intersection_table(
+        clusters,
+        "Unsuper",
+        truth_clusters,
+        "Super",
+        len(clusters),
+    )
+
+
 def clusters_difference_1vsmany(one, many):
     return " ".join(
         map(
@@ -94,9 +131,7 @@ def clusters_comparison(clusters, supervised_cls):
     best_mapping = None
 
     for mapping in permutations(range(len(clusters))):
-        ttl_err, spr_err = compute_error(
-            mapping, np.array(intersections)
-        )
+        ttl_err, spr_err = compute_error(mapping, np.array(intersections))
         if ttl_err < best_total_errors:
             best_total_errors = ttl_err
             best_super_errors = spr_err

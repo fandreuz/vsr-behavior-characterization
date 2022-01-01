@@ -1,4 +1,8 @@
-from utils import clusters_comparison, clusters_intersection_table
+from utils import (
+    clusters_comparison,
+    clusters_intersection_table,
+    report_results,
+)
 from indexes import *
 from cluster import Cluster, VSR
 
@@ -239,41 +243,28 @@ experiment_super_to_unsuper = np.array(experiment_super_to_unsuper)
 best = np.argmin(experiment_errs)
 
 print("\n-------------------- RESULTS ---------------------")
-print(
-    "The best combination ({}) leads to {}/{} errors".format(
-        experiment_labels[best],
-        experiment_errs[best],
-        sum(map(lambda s: len(s._items), supervised_clusters)),
-    )
-)
-print("\n------- Number of misclassified robots")
-for i in range(len(supervised_clusters)):
-    print(
-        "- {} robots wrongly put into the (supervised) cluster {};".format(
-            experiment_err_details[best, i], supervised_clusters[i].name
-        )
-    )
-print("\n------- Size of unsupervised clusters")
-print("Mapping: " + str(experiment_super_to_unsuper[best]))
-for i in range(len(supervised_clusters)):
-    print(
-        "- The supervised cluster {} got {} out of {} expected robots;".format(
-            supervised_clusters[i].name,
-            experiment_clusters[best][
-                experiment_super_to_unsuper[best, i]
-            ].size(),
-            supervised_clusters[i].size(),
-        )
-    )
-print("\n------- Clusters intersection table")
-clusters_intersection_table(
+report_results(
     experiment_clusters[best],
-    "Unsuper",
+    experiment_labels[best],
+    experiment_errs[best],
+    experiment_err_details[best],
+    experiment_super_to_unsuper[best],
     supervised_clusters,
-    "Super",
-    n_clusters,
 )
 
-print("\nSame error in: ")
+print("\n------- Same error in: ")
 for i in np.where(experiment_errs == experiment_errs[best])[0]:
     print(experiment_labels[i])
+
+print("\n\n####### Error using unweighted average_touch_area #######")
+X[:, 0] = concatenated_training_data[ata_key].values
+clusters = run_experiment(X, training_data)
+err, err_details, mapping = clusters_comparison(clusters, supervised_clusters)
+report_results(
+    clusters,
+    "Unweighted avg_touch_area",
+    err,
+    err_details,
+    mapping,
+    supervised_clusters,
+)
