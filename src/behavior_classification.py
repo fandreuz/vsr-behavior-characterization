@@ -183,7 +183,7 @@ for avg_touch_mapping, avg_touch_label in zip(
             )
         else:
             random_columns = np.arange(0, X.shape[1])
-        print('Using the following columns: ' + str(random_columns))
+        print("Using the following columns: " + str(random_columns))
 
         # unsupervised learning engine
         kmeans = KMeans(n_clusters=n_clusters, algorithm="full").fit(
@@ -213,7 +213,7 @@ for avg_touch_mapping, avg_touch_label in zip(
                 )
 
         err, err_details, mapping = clusters_comparison(
-            clusters, supervised_clusters, relative_intersection_error=True
+            clusters, supervised_clusters
         )
         print("Errors: " + str(err))
 
@@ -229,7 +229,7 @@ experiment_super_to_unsuper = np.array(experiment_super_to_unsuper)
 
 best = np.argmin(experiment_errs)
 
-print('\n-------------------- RESULTS ---------------------')
+print("\n-------------------- RESULTS ---------------------")
 print(
     "The best combination ({}) leads to {}/{} errors".format(
         experiment_labels[best],
@@ -245,7 +245,7 @@ for i in range(len(supervised_clusters)):
         )
     )
 print("\n------- Size of unsupervised clusters")
-print('Mapping: ' + str(experiment_super_to_unsuper[best]))
+print("Mapping: " + str(experiment_super_to_unsuper[best]))
 for i in range(len(supervised_clusters)):
     print(
         "- The supervised cluster {} got {} out of {} expected robots;".format(

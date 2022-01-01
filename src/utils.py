@@ -1,4 +1,5 @@
 import numpy as np
+from itertools import permutations
 
 
 def beautiful_padded(key, value, n_pad=40):
@@ -59,6 +60,15 @@ def clusters_intersection_table(
             )
 
 
+# return the error which results from the j-th supervised cluster (columns of
+# intersections_matrix) to the mapping[j]-th unsupervised cluster (rows of
+# intersections_matrix)
+def compute_error(mapping, intersections_matrix):
+    for i in range(len(mapping)):
+        intersections_matrix[mapping[i], i] = 0
+    return np.sum(intersections_matrix), np.sum(intersections_matrix, axis=0)
+
+
 # compute the error committed in clusters, which is defined as the sum of the
 # elements on each row that are not the row-wise maximum
 # Example:
@@ -73,40 +83,23 @@ def clusters_intersection_table(
 # 2. count of misclassified robots for each supervised cluster
 # 3. mapping from supervised cluster to the corresponding unsupervised (via
 #       indexes)
-def clusters_comparison(
-    clusters, supervised_cls, relative_intersection_error=True
-):
-    intersections = np.zeros((len(clusters), len(supervised_cls)))
+def clusters_comparison(clusters, supervised_cls):
+    intersections = np.zeros((len(clusters), len(supervised_cls)), dtype=int)
     for i in range(len(clusters)):
         for j in range(len(supervised_cls)):
             intersections[i, j] = len(clusters[i].intersect(supervised_cls[j]))
-    # weight the error using the expected size of the cluster
-    relative_intersections = intersections / supervised_cls[j].size()
 
-    # maps the index of a supervised cluster to the corresponding unsupervised
-    # cluster (which is considered to be the cluster having the maximum number
-    # of intersections)
-    super_to_unsuper = np.zeros(len(supervised_cls), dtype=int) - 1
-    intersections_copy = np.array(
-        relative_intersections
-        if relative_intersection_error
-        else intersections
-    )
-    for _ in range(len(supervised_cls)):
-        idx = np.where(intersections_copy == np.max(intersections_copy))
-        # max may return more than one index
-        idx = (idx[0][0], idx[1][0])
-        # establish the mapping
-        super_to_unsuper[idx[1]] = idx[0]
-        # we do not want to catch maxs from these row/column anymore
-        intersections_copy[idx[0], :] = 0
-        intersections_copy[:, idx[1]] = 0
+    best_total_errors = 100000
+    best_super_errors = None
+    best_mapping = None
 
-    for i in range(len(supervised_cls)):
-        intersections[super_to_unsuper[i], i] = 0
+    for mapping in permutations(range(len(clusters))):
+        ttl_err, spr_err = compute_error(
+            mapping, np.array(intersections)
+        )
+        if ttl_err < best_total_errors:
+            best_total_errors = ttl_err
+            best_super_errors = spr_err
+            best_mapping = mapping
 
-    total_errors = int(np.sum(intersections))
-    # number of mislcassified robots in each supervised cluster
-    super_errors = list(map(int, np.sum(intersections, axis=0)))
-
-    return total_errors, super_errors, super_to_unsuper
+    return best_total_errors, best_super_errors, best_mapping
