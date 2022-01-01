@@ -33,7 +33,7 @@ def report_results(
     print("Mapping: " + str(mapping))
     for i in range(len(truth_clusters)):
         print(
-            "- The supervised cluster {} got {} out of {} expected robots;".format(
+            "- The unsupervised cluster {} got {} out of {} expected robots;".format(
                 truth_clusters[i].name,
                 clusters[mapping[i]].size(),
                 truth_clusters[i].size(),
@@ -47,8 +47,8 @@ def report_results(
         "Super",
         len(clusters),
     )
-    print('\n------- Cluster dump')
-    print('\n'.join(map(str, clusters)))
+    print("\n------- Cluster dump")
+    print("\n".join(map(str, clusters)))
 
 
 def clusters_difference_1vsmany(one, many):
@@ -136,8 +136,8 @@ def clusters_comparison(clusters, supervised_cls):
             intersections[i, j] = len(clusters[i].intersect(supervised_cls[j]))
 
     best_total_errors = big_error
-    best_super_errors = None
-    best_mapping = None
+    best_super_errors = np.array([-1] * len(supervised_cls))
+    best_mapping = np.array([-1] * len(supervised_cls))
 
     for mapping in permutations(range(len(clusters))):
         ttl_err, spr_err = compute_error(mapping, np.array(intersections))

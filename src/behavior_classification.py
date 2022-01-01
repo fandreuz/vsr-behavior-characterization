@@ -232,7 +232,6 @@ for avg_touch_mapping, avg_touch_label in zip(
         experiment_errs.append(err)
         experiment_err_details.append(err_details)
         experiment_super_to_unsuper.append(mapping)
-
         experiment_labels.append(experiment_label)
 
 experiment_errs = np.array(experiment_errs)
