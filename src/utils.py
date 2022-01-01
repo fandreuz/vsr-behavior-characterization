@@ -48,7 +48,7 @@ def report_results(
         len(clusters),
     )
     print('\n------- Cluster dump')
-    print('\n'.join(clusters))
+    print('\n'.join(map(str, clusters)))
 
 
 def clusters_difference_1vsmany(one, many):
