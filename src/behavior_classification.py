@@ -49,6 +49,10 @@ normalize_spectra = True
 # allocate and fill supervised clusters
 supervised_clusters = []
 
+if n_clusters == 3:
+    biped_crawling.extend(biped_rolling)
+    worm_crawling.extend(worm_rolling)
+
 for label, bp, wm in zip(
     ["Crawling", "Walking", "Jumping", "Rolling"],
     [biped_crawling, biped_walking, biped_jumping, biped_rolling],

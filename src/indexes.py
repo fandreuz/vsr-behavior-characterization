@@ -12,7 +12,7 @@ def k_mode_interval(X):
     return longest_interval / X["best→fitness→as[Outcome]→gait→mode.interval"]
 
 
-# onsider also the "purity" (how many intervals are equal to
+# consider also the "purity" (how many intervals are equal to
 # the mode interval?). obviously if purity=1, kmi is very significant. as
 # purity->0 the significance decreases (the degree of decrease may vary, if
 # the degree is high the decrease in significance is very fast).
