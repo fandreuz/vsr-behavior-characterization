@@ -46,6 +46,18 @@ else:
 normalize_spectra = True
 
 # ------------------------------------------------------
+rolling_cluster_destination_dict = {
+    "j": (biped_jumping, worm_jumping),
+    "w": (biped_walking, worm_walking),
+    "c": (biped_crawling, worm_crawling),
+}
+
+if len(sys.argv) > 2:
+    fallback = sys.argv[2]
+else:
+    fallback = 'j'
+rolling_cluster_destination = rolling_cluster_destination_dict[fallback]
+
 # allocate and fill supervised clusters
 supervised_clusters = []
 
@@ -176,7 +188,9 @@ for avg_touch_mapping, avg_touch_label in zip(
         weights = np.ones(X.shape[1])
         weights[0] = avg_touch_area_weight
 
-        clusters = run_experiment(X, training_data, weights=weights, n_clusters=n_clusters)
+        clusters = run_experiment(
+            X, training_data, weights=weights, n_clusters=n_clusters
+        )
         experiment_clusters.append(clusters)
 
         err, err_details, mapping = clusters_comparison(
