@@ -23,4 +23,8 @@ TBD
 + Luca Filippi
 
 ## References
-TBD
+1. Ferigo et al. 2021, *Beyond body shape and brain: evolving the sensory apparatus of voxel-based soft robots.*
+2. Hastie, Tibshirani, Friedman, 2009, *An introduction to statistical learning.*
+3. Medvet et al. 2020, *Design, validation, and case studies of 2d-vsr-sim, an optimization-friendly simulator of 2-d voxel-based soft robots.*
+4. Medvet et al. 2021, *Biodiversity in evolved voxel-based soft robots.*
+5. Panday et al. 2018, *Feature weighting as a tool for unsupervised feature selection.*
