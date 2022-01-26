@@ -1,5 +1,5 @@
 # vsr-behavior-characterization
-In this small project we apply Unsupervised Learning techniques to find
+In this small project we apply an Unsupervised Learning technique (`KMeans`) to find
 recurrent behaviors in a dataset of Voxel-Based Soft Robots (VSR).
 
 ## Structure of the project
@@ -16,11 +16,38 @@ contain two different versions of verification datasets that we prepared by
 hand via the manual inspection of videos available alongside the datasets.
 
 ## Example run and output
-TBD
+Navigate to the root folder of the project (you should see both `src` and
+`dataset`). To run an experiment, use the following command
+
+```python
+python3 src/behavior_classification.py N
+```
+
+where `N` is the desired number of clusters. Note that at the moment we support
+only `N=3` and `N=4` since these are the only values for which we managed to
+generate two supervised datasets "by hand", in which we classified the behavior
+of the robots according to our opinion. This allows us to select the best
+combination of the weights we introduced in our approach (and which we wish to
+optimize in order to obtain improved results). Therefore, new supervised
+datasets are needed to increase the domain of `N`. Have a look at the files
+`dataset/supervised_clusters*.py` to see how we represented the supervised
+clusters.
+
+The script tries a wide set of possible values for the weights, and for each
+combination produces the following output:
+![Combos](res/all_combo_weights.png)
+
+This first step may last up to one hour, depending on your device. When all the combination have been tested, an ouput similar to following is printed (we set `N=3` for this example):
+![Combos](res/results.png)
+
+As you can see you receive immediately a clear overview of the results for the optimal combination, along with an in-depth comparison between supervised and unsupervised clusters (i.e. clusters built "by hand" and clusters built by the algorithm `KMeans`).
 
 ## Authors
 + Francesco Andreuzzi
 + Luca Filippi
+
+## Implementation details
+We coded the experiment using Python, along with the scientific libraries NumPy and scikit-learn.
 
 ## References
 1. Ferigo et al. 2021, *Beyond body shape and brain: evolving the sensory apparatus of voxel-based soft robots.*
